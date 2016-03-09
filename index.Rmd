@@ -5,7 +5,7 @@ date: "*March 8, 2016*"
 output: html_document
 ---
 
-###**Data processessing:**
+###**Data preparation:**
 
 For now I'm seeing what is already "out there", such in [this repository](https://rpubs.com/DIM302/PracticalMachineLearning).
 
@@ -13,6 +13,9 @@ First let's load the raw data:
 
 ```{r, message=F, echo=F, warning=FALSE}
 library(caret)
+library(rpart)
+library(rpart.plot)
+library(rattle)
 trainUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
 testUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
 training <- read.csv(file = "/Users/p/Documents/R/Practical_Machine_Learning/pml-training.csv", 
@@ -23,13 +26,50 @@ testing <- read.csv(file =
 ```
 
 ```{r}
-dim(training) 
-dim(testing)
+dim(training); dim(testing) # That is no.rows x no.columns
 ```
 Partitioning the training dataset:
 
 ```{r}
-inTrain <- createDataPartition(training$classe, p=0.6, list=FALSE)
+inTrain <- createDataPartition(training$classe, p = 0.6, list=FALSE)
 myTraining <- training[inTrain,  ]
-myTesting  <- training[-inTrain, ]
+# This corresponds to...
+round(100 * nrow(myTraining) / nrow(training), 0) # percentage of the training data
+myTesting  <- training[-inTrain,  ]
+dim(myTraining); dim(myTesting)
+```
+
+Removing variables with near zero variance:
+
+```{r}
+head(nzv <- nearZeroVar(myTraining, saveMetrics=TRUE))[1:4, ]
+nzv <- nearZeroVar(myTraining, saveMetrics=TRUE)
+myTraining <- myTraining[ ,nzv$nzv ==FALSE]
+myTesting  <- myTesting [  ,nzv$nzv==FALSE]
+# The first column is just row numbers:
+myTraining <- myTraining[c(-1)]
+dim(myTraining)
+```
+
+It seems as though there are a lot of columns with an overwhelming majority of `NA` values. Even setting a limit as low as $1\%$ of non-empty entries, we could eliminate them:
+
+```{r}
+empty <- rep(0, length(myTraining))
+for(i in 1:length(myTraining)){
+    if (sum((is.na(myTraining[ ,i])) / nrow(myTraining)) > 0.01){
+        empty[i] <- i  
+    } 
+    else{
+        empty[i] <- NA
+    }
+}
+empty; length(empty)
+empty <- na.omit(empty)
+train <- myTraining[ ,c(-empty)]
+dim(train)
+```
+
+```{r}
+modFitA1 <- rpart(classe ~ ., data=train, method="class")
+fancyRpartPlot(modFitA1)
 ```
