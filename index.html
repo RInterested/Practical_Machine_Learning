@@ -61,14 +61,24 @@ img {
 
 
 <div id="header">
-<h1 class="title">Practical Machine Learning Assignment</h1>
-<h4 class="author"><em>Antoni Parellada</em></h4>
-<h4 class="date"><em>March 8, 2016</em></h4>
+<h1 class="title"><strong>Practical Machine Learning Assignment</strong></h1>
+<h4 class="author"><em><em>Antoni Parellada</em></em></h4>
+<h4 class="date"><em><em>March 8, 2016</em></em></h4>
 </div>
 
 
 <div id="data-processessing" class="section level3">
 <h3><strong>Data processessing:</strong></h3>
+<p>For now I’m seeing what is already “out there”, such in <a href="https://rpubs.com/DIM302/PracticalMachineLearning">this repository</a>.</p>
+<p>First let’s load the raw data:</p>
+<pre class="r"><code>dim(training) </code></pre>
+<pre><code>## [1] 19622   160</code></pre>
+<pre class="r"><code>dim(testing)</code></pre>
+<pre><code>## [1]  20 160</code></pre>
+<p>Partitioning the training dataset:</p>
+<pre class="r"><code>inTrain &lt;- createDataPartition(training$classe, p=0.6, list=FALSE)
+myTraining &lt;- training[inTrain,  ]
+myTesting  &lt;- training[-inTrain, ]</code></pre>
 </div>
 
 

@@ -1,8 +1,35 @@
 ---
-title: "Practical Machine Learning Assignment"
-author: "Antoni Parellada"
-date: "March 8, 2016"
+title: "**Practical Machine Learning Assignment**"
+author: "*Antoni Parellada*"
+date: "*March 8, 2016*"
 output: html_document
 ---
 
 ###**Data processessing:**
+
+For now I'm seeing what is already "out there", such in [this repository](https://rpubs.com/DIM302/PracticalMachineLearning).
+
+First let's load the raw data:
+
+```{r, message=F, echo=F, warning=FALSE}
+library(caret)
+trainUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training <- read.csv(file = "/Users/p/Documents/R/Practical_Machine_Learning/pml-training.csv", 
+                     header = T, na.strings=c("NA","#DIV/0!",""))
+testing <- read.csv(file =
+"/Users/p/Documents/R/Practical_Machine_Learning/pml-testing.csv", 
+                     header = T, na.strings=c("NA","#DIV/0!",""))
+```
+
+```{r}
+dim(training) 
+dim(testing)
+```
+Partitioning the training dataset:
+
+```{r}
+inTrain <- createDataPartition(training$classe, p=0.6, list=FALSE)
+myTraining <- training[inTrain,  ]
+myTesting  <- training[-inTrain, ]
+```
