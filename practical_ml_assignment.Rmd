@@ -1,0 +1,8 @@
+---
+title: "Practical Machine Learning Assignment"
+author: "Antoni Parellada"
+date: "March 8, 2016"
+output: html_document
+---
+
+###**Data processessing:**
