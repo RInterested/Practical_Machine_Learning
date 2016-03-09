@@ -15,9 +15,6 @@ First let's load the raw data:
 library(caret)
 library(rpart)
 library(rpart.plot)
-library(rattle)
-trainUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
-testUrl <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
 training <- read.csv(file = "/Users/p/Documents/R/Practical_Machine_Learning/pml-training.csv", 
                      header = T, na.strings=c("NA","#DIV/0!",""))
 testing <- read.csv(file =
@@ -31,32 +28,34 @@ dim(training); dim(testing) # That is no.rows x no.columns
 Partitioning the training dataset:
 
 ```{r}
-inTrain <- createDataPartition(training$classe, p = 0.6, list=FALSE)
-myTraining <- training[inTrain,  ]
+training_rows <-    createDataPartition(training$classe, p = 0.6, list=FALSE)
+# training$classe is the vector of outcomes; p is the percentage of data going to training
+# list = F makes the result a matrix.
+little_train <- training[training_rows,  ]
 # This corresponds to...
-round(100 * nrow(myTraining) / nrow(training), 0) # percentage of the training data
-myTesting  <- training[-inTrain,  ]
-dim(myTraining); dim(myTesting)
+round(100 * nrow(little_train) / nrow(training), 0) # percentage of the training data
+little_test  <- training[-training_rows,  ]
+dim(little_train); dim(little_test)
 ```
 
 Removing variables with near zero variance:
 
 ```{r}
-head(nzv <- nearZeroVar(myTraining, saveMetrics=TRUE))[1:4, ]
-nzv <- nearZeroVar(myTraining, saveMetrics=TRUE)
-myTraining <- myTraining[ ,nzv$nzv ==FALSE]
-myTesting  <- myTesting [  ,nzv$nzv==FALSE]
+head(nzv <- nearZeroVar(little_train, saveMetrics=TRUE))[1:4, ]
+nzv <- nearZeroVar(little_train, saveMetrics=TRUE)
+little_train <- little_train[ ,nzv$nzv ==FALSE]
+little_test  <- little_test [  ,nzv$nzv==FALSE]
 # The first column is just row numbers:
-myTraining <- myTraining[c(-1)]
-dim(myTraining)
+little_train <- little_train[c(-1)]
+dim(little_train)
 ```
 
 It seems as though there are a lot of columns with an overwhelming majority of `NA` values. Even setting a limit as low as $1\%$ of non-empty entries, we could eliminate them:
 
 ```{r}
-empty <- rep(0, length(myTraining))
-for(i in 1:length(myTraining)){
-    if (sum((is.na(myTraining[ ,i])) / nrow(myTraining)) > 0.01){
+empty <- rep(0, length(little_train))
+for(i in 1:length(little_train)){
+    if (sum((is.na(little_train[ ,i])) / nrow(little_train)) > 0.01){
         empty[i] <- i  
     } 
     else{
@@ -65,11 +64,15 @@ for(i in 1:length(myTraining)){
 }
 empty; length(empty)
 empty <- na.omit(empty)
-train <- myTraining[ ,c(-empty)]
+train <- little_train[ ,c(-empty)]
 dim(train)
 ```
+---
+
+###**Data analysis:**
 
 ```{r}
-modFitA1 <- rpart(classe ~ ., data=train, method="class")
-fancyRpartPlot(modFitA1)
+fit <- rpart(classe ~ ., data=train, method="class") # Classification tree
+plot(fit)
+text(fit,cex=0.6)
 ```
