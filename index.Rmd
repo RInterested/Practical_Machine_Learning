@@ -53,6 +53,7 @@ dim(little_train)
 It seems as though there are a lot of columns with an overwhelming majority of `NA` values. Even setting a limit as low as $1\%$ of non-empty entries, we could eliminate them:
 
 ```{r}
+throw_away <- function(){
 empty <- rep(0, length(little_train))
 for(i in 1:length(little_train)){
     if (sum((is.na(little_train[ ,i])) / nrow(little_train)) > 0.01){
@@ -62,17 +63,18 @@ for(i in 1:length(little_train)){
         empty[i] <- NA
     }
 }
-empty; length(empty)
-empty <- na.omit(empty)
-train <- little_train[ ,c(-empty)]
-dim(train)
+    na.omit(empty)
+}
+little_train <- little_train[ ,c(-throw_away())]
+dim(little_train)
 ```
 ---
 
 ###**Data analysis:**
 
 ```{r}
-fit <- rpart(classe ~ ., data=train, method="class") # Classification tree
+fit <- rpart(classe ~ ., data=little_train, method="class") # Classification tree
+printcp(fit)
 plot(fit)
-text(fit,cex=0.6)
+text(fit, cex = 0.5)
 ```
