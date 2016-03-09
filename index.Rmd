@@ -53,10 +53,10 @@ dim(little_train)
 It seems as though there are a lot of columns with an overwhelming majority of `NA` values. Even setting a limit as low as $1\%$ of non-empty entries, we could eliminate them:
 
 ```{r}
-throw_away <- function(){
-empty <- rep(0, length(little_train))
-for(i in 1:length(little_train)){
-    if (sum((is.na(little_train[ ,i])) / nrow(little_train)) > 0.01){
+throw_away <- function(x){
+empty <- rep(0, length(x))
+for(i in 1:length(x)){
+    if (sum((is.na(x[ ,i])) / nrow(x)) > 0.01){
         empty[i] <- i  
     } 
     else{
@@ -65,7 +65,7 @@ for(i in 1:length(little_train)){
 }
     na.omit(empty)
 }
-little_train <- little_train[ ,c(-throw_away())]
+little_train <- little_train[ ,c(-throw_away(little_train))]
 dim(little_train)
 ```
 ---
