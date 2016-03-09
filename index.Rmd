@@ -15,10 +15,10 @@ First let's load the raw data:
 library(caret)
 library(rpart)
 library(rpart.plot)
-training <- read.csv(file = "/Users/p/Documents/R/Practical_Machine_Learning/pml-training.csv", 
+training <- read.csv(file = "~/R/Practical_Machine_Learning/pml-training.csv", 
                      header = T, na.strings=c("NA","#DIV/0!",""))
 testing <- read.csv(file =
-"/Users/p/Documents/R/Practical_Machine_Learning/pml-testing.csv", 
+"~/R/Practical_Machine_Learning/pml-testing.csv", 
                      header = T, na.strings=c("NA","#DIV/0!",""))
 ```
 
