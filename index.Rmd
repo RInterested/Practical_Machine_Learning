@@ -23,6 +23,10 @@ testing <- read.csv(file =
 
 # Response variable has to be a factor, and it already is:
 str(training$classe)
+
+#Since a POSIX list will interfere with other calculations, I'll leave it out:
+testing <- within(testing, rm(cvtd_timestamp))
+training <- within(training, rm(cvtd_timestamp))
 ```
 
 ```{r}
@@ -83,14 +87,12 @@ fit <- rpart(classe ~ ., data=little_train, method="class") # Classification tre
 printcp(fit)
 bestcp <- fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"]
 fit.pruned <- prune(fit, cp = bestcp)
-plot(fit.pruned)
-text(fit.pruned, cex=0.5, use.n = T, xpd = T)
-prp(fit.pruned,varlen = 0, clip.right.labs = T, cex=0.5, extra = 1, type = 0, nn = T, yesno = T, ni = 1, fallen.leaves = T,xflip = T, digits = 0, faclen = 0)
+prp(fit.pruned, cex=0.7, fallen.leaves = T,under = T)
 p = predict(fit, little_test, type = "class")
 ```
 
 The confusion matrix is:
 
 ```{r}
-table(little_test$classe, predicted = p)
+table(actual = little_test$classe, predicted = p)
 ```
