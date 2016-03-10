@@ -96,4 +96,7 @@ The confusion matrix is:
 
 ```{r}
 table(actual = little_test$classe, predicted = p)
+
+# Or with the built-in R function from caret:
+confusionMatrix(p, little_test$classe)
 ```
