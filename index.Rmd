@@ -88,6 +88,7 @@ printcp(fit)
 bestcp <- fit$cptable[which.min(fit$cptable[,"xerror"]),"CP"]
 fit.pruned <- prune(fit, cp = bestcp)
 prp(fit.pruned, cex=0.7, fallen.leaves = T,under = T)
+fit
 p = predict(fit, little_test, type = "class")
 ```
 
