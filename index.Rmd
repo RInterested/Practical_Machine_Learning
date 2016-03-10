@@ -1,15 +1,11 @@
 ---
 title: "**Practical Machine Learning Assignment**"
 author: "*Antoni Parellada*"
-date: "*March 8, 2016*"
 output: html_document
 ---
 
 ###**Data preparation:**
 
-For now I'm seeing what is already "out there", such in [this repository](https://rpubs.com/DIM302/PracticalMachineLearning).
-
-First let's load the raw data:
 
 ```{r, message=F, echo=F, warning=FALSE}
 library(caret)
@@ -17,47 +13,31 @@ library(rpart)
 library(rpart.plot)
 library(randomForest)
 library(caret)
+```
 
+First let's load the raw data:
+
+```{r, message=F, echo=F, warning=FALSE}
 training <- read.csv(file = "~/R/Practical_Machine_Learning/pml-training.csv", 
                      header = T, na.strings=c("NA","#DIV/0!",""))
-testing <- read.csv(file =
-"~/R/Practical_Machine_Learning/pml-testing.csv", 
+testing <- read.csv(file = "~/R/Practical_Machine_Learning/pml-testing.csv", 
                      header = T, na.strings=c("NA","#DIV/0!",""))
+```
 
-# Response variable has to be a factor, and it already is:
-str(training$classe)
+And take a look at it... The dimensions of the training set are `dim(training)` $19622$ rows by $159$ columns. The testing set is $20 \times 159$. 
 
-#Since a POSIX list will interfere with other calculations, I'll leave it out:
-testing <- within(testing, rm(cvtd_timestamp))
+To prepare the data we start by making sure that the variable we want to predict is a factor: `str(training$classe) Factor w/ 5 levels "A","B","C","D"`.
+
+There is a variable `cvtd_timestamp` with dates formatted as `05/12/2011 11:23`. This is bound to cause problems, and it is hard to imagine its having an effect on the model. We can convert from the current structure of `Factor w/ 20 levels "02/12/2011 13:32"` to a POSIX format, but it each entry will be a list, creating other handling issues. For now, we can eliminate this column:
+
+```{r}
 training <- within(training, rm(cvtd_timestamp))
 ```
 
-```{r}
-dim(training); dim(testing) # That is no.rows x no.columns
-```
-Partitioning the training dataset:
+Likewise, the first column is just the row numbers, so we remove it:
 
 ```{r}
-training_rows <-    createDataPartition(training$classe, p = 0.6, list=FALSE)
-# training$classe is the vector of outcomes; p is the percentage of data going to training
-# list = F makes the result a matrix.
-little_train <- training[training_rows,  ]
-# This corresponds to...
-round(100 * nrow(little_train) / nrow(training), 0) # percentage of the training data
-little_test  <- training[-training_rows,  ]
-dim(little_train); dim(little_test)
-```
-
-Removing variables with near zero variance:
-
-```{r}
-head(nzv <- nearZeroVar(little_train, saveMetrics=TRUE))[1:4, ]
-nzv <- nearZeroVar(little_train, saveMetrics=TRUE)
-little_train <- little_train[  ,nzv$nzv == FALSE]
-little_test  <- little_test [  ,nzv$nzv == FALSE]
-# The first column is just row numbers:
-little_train <- little_train[c(-1)]
-dim(little_train)
+training <- training[c(-1)]
 ```
 
 It seems as though there are a lot of columns with an overwhelming majority of `NA` values. Even setting a limit as low as $<5\%$ of non-empty entries, we could eliminate them:
@@ -76,11 +56,36 @@ for(i in 1:length(x)){
     na.omit(empty)
 }
 
-little_train <- little_train[ ,c(-throw_away(little_train))]
-dim(little_train)
-little_test <- little_test[ ,c(-throw_away(little_test))]
+training <- training[ ,c(-throw_away(training))]
+dim(training)
+```
+
+Finally we get rid of variables with near-zero variance:
+
+```{r}
+nzv <- nearZeroVar(training, saveMetrics=TRUE)
+training <- training[  , nzv$nzv == FALSE]
+dim(training)
+```
+
+---
+
+###**Training set partitions:**
+
+Now we partition the training dataset into $60\%$ for *sub*-training and $40%$ for *sub*-testing sets to assess out of sample accuracy (cross validation). We can do this by randomly selecting rows:
+
+```{r}
+training_rows <- sample(1:nrow(training), round(0.6 * nrow(training)))
+little_train <- training[training_rows, ]
+
+# This corresponds to...
+round(100 * nrow(little_train) / nrow(training), 0) # percentage of the training data.
+
+# And the rest go to the sub-testing set:
+little_test  <- training[-training_rows,  ]
 dim(little_train); dim(little_test)
 ```
+
 ---
 
 ###**Data analysis:**
