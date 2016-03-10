@@ -15,6 +15,9 @@ First let's load the raw data:
 library(caret)
 library(rpart)
 library(rpart.plot)
+library(randomForest)
+library(caret)
+
 training <- read.csv(file = "~/R/Practical_Machine_Learning/pml-training.csv", 
                      header = T, na.strings=c("NA","#DIV/0!",""))
 testing <- read.csv(file =
@@ -82,6 +85,8 @@ dim(little_train); dim(little_test)
 
 ###**Data analysis:**
 
+####**Decision Tree Learning:**
+
 ```{r}
 fit <- rpart(classe ~ ., data=little_train, method="class") # Classification tree
 printcp(fit)
@@ -100,3 +105,22 @@ table(actual = little_test$classe, predicted = p)
 # Or with the built-in R function from caret:
 confusionMatrix(p, little_test$classe)
 ```
+
+
+####**Random Forest:**
+
+```{r}
+fit2 <- randomForest(classe ~ ., data=little_train)
+p2 = predict(fit2, little_test, type = "class")
+confusionMatrix(p2, little_test$classe)
+```
+
+
+---
+
+###**Test Data Prediction:**
+
+```{r}
+predict(fit2, testing, type = "class")
+```
+
